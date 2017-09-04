@@ -1,14 +1,16 @@
 package zhl.idimg.img;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
+
+import javax.imageio.ImageIO;
 
 public class BMPHelper {
 	
@@ -61,10 +63,21 @@ public class BMPHelper {
 			
 			int height = bmp.getBiHeight(),
 				width = bmp.getBiWidth();
-					
+			
+			boolean squen = false;
+			if(height < 0 ){
+				height = -height;
+				bmp.setBiHeight(height);
+				squen = true;
+			}
 			byte[][] result = new byte[height][];
 			
-			int i=0,j=height-1;
+			int i=0,j;
+			if(!squen){
+				j = height-1;
+			}else{
+				j = 0;
+			}
 			byte[] temp = new byte[16];
 			byte[] bt = new byte[width];
 			loop1:while(in.read(temp)!=-1){
@@ -76,11 +89,18 @@ public class BMPHelper {
 							bt[i] = 1;
 						}
 						i++;
-						if(i==100){
+						if(i==width){
 							result[j] = bt;
-							j--;
-							if(j<0){
-								break loop1;
+							if(!squen){
+								j--;
+								if(j<0){
+									break loop1;
+								}
+							}else{
+								j++;
+								if(j>=height){
+									break loop1;
+								}
 							}
 							bt = new byte[width];
 							i = 0;
@@ -105,6 +125,51 @@ public class BMPHelper {
 		return null;
 	}
 	
+	
+	public byte[][] binaryImg(File f){
+		try {
+			int tv = 125;
+			BufferedImage bf = ImageIO.read(f);
+			
+			int w = bf.getWidth(),h = bf.getHeight();
+
+			byte[][] grays = new byte[h][w];
+			//Arrays.fill(grays[0], (byte)1);
+			//Arrays.fill(grays[h-1], (byte)1);
+			for(int i=0 ; i<h; i++){
+				//grays[i][0] = (byte)1;
+				//grays[i][w-1] = (byte)1;
+				for(int j=0; j<w; j++){
+					try {
+						int rgb = bf.getRGB(j, i);
+						Color color = new Color(rgb);
+
+						int r = color.getRed();
+						int g = color.getGreen();
+						int b = color.getBlue();
+
+						int gray = (30*r+59*g+11*b)/100;
+						if(gray >= tv){
+							grays[i][j] = 1;
+						}else{
+							grays[i][j] = 0;
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+					
+				}
+			}
+			
+			return grays;
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
 	
 	public int readNextInt(InputStream in) throws IOException{
 		int count = in.read(readBuffer);
@@ -234,34 +299,6 @@ public class BMPHelper {
 		return file;
 	}
 	public static void main(String[] args) {
-		BMPHelper helper = new BMPHelper();
-		File basedir = new File("C:\\Users\\朱洪亮\\Desktop\\验证码识别");
-		new FileFilter() {
-			
-			public boolean accept(File pathname) {
-				// TODO Auto-generated method stub
-				return false;
-			}
-		};
-		File[] bmps = basedir.listFiles((file)->{
-			if(file.getName().endsWith(".bmp")){
-				return true;
-			}
-			return false;
-		});
-		for(File f:bmps){
-			BMP bmp= helper.readAsBytes(f.getPath());
-			Spliter spliter = new Spliter();
-			//short[] pixelDist = spliter.getPixelDist(bmp.getData());
-			
-			List<byte[][]> result = spliter.splitWithCFS(bmp.getData());
-			
-			String baseN = f.getPath().replace(".bmp", "");
-			
-			for(int i=0; i<result.size(); i++){
-				helper.generateBMP(result.get(i), baseN+i+".bmp");
-			}
-		}
 		
 	}
 }

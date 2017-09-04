@@ -57,57 +57,66 @@ public class Spliter {
 		Queue<short[]> sq = new LinkedList<>();
 		for(short i=0; i<rowNum; i++){
 			for(short j=0; j<colNum; j++){
-				if(!s[i][j] && bmp[i][j]==0){
-					List<short[]> cfs = new ArrayList<>();
-					sq.add(new short[]{i,j});
-					s[i][j] = true;
-					while(!sq.isEmpty()){
-						short[] p = sq.poll();
-						cfs.add(p);
-						
-						short r = p[0],c = p[1];
-						//右
-						if(c+1<colNum){
-							searchPoint(new short[]{r,(short)(c+1)},sq, bmp, s);
+				try {
+					if(!s[i][j] && bmp[i][j]==0){
+						List<short[]> cfs = new ArrayList<>();
+						sq.add(new short[]{i,j});
+						s[i][j] = true;
+						while(!sq.isEmpty()){
+							short[] p = sq.poll();
+							cfs.add(p);
+							
+							short r = p[0],c = p[1];
+							//右
+							if(c+1<colNum){
+								searchPoint(new short[]{r,(short)(c+1)},sq, bmp, s);
+							}
+							//右下
+							if(c+1<colNum && r+1<rowNum){
+								searchPoint(new short[]{(short)(r+1),(short)(c+1)},sq, bmp, s);
+							}
+							//右上
+							if(c+1<colNum && r-1>=0){
+								searchPoint(new short[]{(short)(r-1),(short)(c+1)},sq, bmp, s);
+							}
+							//左
+							if(c-1>=0){
+								searchPoint(new short[]{r,(short)(c-1)},sq, bmp, s);
+							}
+							//左上
+							if(c-1>=0 && r-1>=0){
+								searchPoint(new short[]{(short)(r-1),(short)(c-1)},sq, bmp, s);
+							}
+							//左下
+							if(c-1>=0 && r+1<rowNum){
+								searchPoint(new short[]{(short)(r+1),(short)(c-1)},sq, bmp, s);
+							}
+							//上
+							if(r-1>=0){
+								searchPoint(new short[]{(short)(r-1),c},sq, bmp, s);
+							}
+							//下
+							if(r+1<rowNum){
+								searchPoint(new short[]{(short)(r+1),c},sq, bmp, s);
+							}
+							
 						}
-						//右下
-						if(c+1<colNum && r+1<rowNum){
-							searchPoint(new short[]{(short)(r+1),(short)(c+1)},sq, bmp, s);
-						}
-						//右上
-						if(c+1<colNum && r-1>=0){
-							searchPoint(new short[]{(short)(r-1),(short)(c+1)},sq, bmp, s);
-						}
-						//左
-						if(c-1>=0){
-							searchPoint(new short[]{r,(short)(c-1)},sq, bmp, s);
-						}
-						//左上
-						if(c-1>=0 && r-1>=0){
-							searchPoint(new short[]{(short)(r-1),(short)(c-1)},sq, bmp, s);
-						}
-						//左下
-						if(c-1>=0 && r+1<rowNum){
-							searchPoint(new short[]{(short)(r+1),(short)(c-1)},sq, bmp, s);
-						}
-						//上
-						if(r-1>=0){
-							searchPoint(new short[]{(short)(r-1),c},sq, bmp, s);
-						}
-						//下
-						if(r+1<rowNum){
-							searchPoint(new short[]{(short)(r+1),c},sq, bmp, s);
-						}
-						
-					}
-					cfses.add(cfs);
-				}				
+						cfses.add(cfs);
+					}				
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
 			}
 		}
 		
 		List<byte[][]> result = new ArrayList<>();
 		
 		for(List<short[]> cfs:cfses){
+			if(cfs.size()<3){
+				continue;
+			}
+			
 			short mic=Short.MAX_VALUE,mir=Short.MAX_VALUE,mxc=0,mxr=0;
 			for(short[] p:cfs){
 				short r = p[0],c = p[1];
