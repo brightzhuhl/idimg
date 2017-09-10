@@ -11,10 +11,10 @@ import zhl.idimg.img.Spliter;
 
 public class AppTest {
 	
-	@Test
+	
 	public void split(){
 		BMPHelper helper = new BMPHelper();
-		File basedir = new File("C:\\Users\\Administrator\\Desktop\\验证码处理");
+		File basedir = new File("C:\\Users\\朱洪亮\\Desktop\\验证码识别");
 		File[] bmps = basedir.listFiles((file)->{
 			if(file.getName().endsWith(".bmp")){
 				return true;
@@ -41,11 +41,11 @@ public class AppTest {
 	}
 	
 	public void binary(){
-		File basedir = new File("C:\\Users\\Administrator\\Desktop\\验证码处理");
+		File basedir = new File("C:\\Users\\朱洪亮\\Desktop\\验证码识别");
 		BMPHelper helper = new BMPHelper();
 		
 		File[] jpgs = basedir.listFiles((file)->{
-			if(file.getName().endsWith("_.jpg")){
+			if(file.getName().endsWith(".jpg")){
 				return true;
 			}
 			return false;
@@ -54,5 +54,9 @@ public class AppTest {
 			byte[][] bmp = helper.binaryImg(f);
 			helper.generateBMP(bmp, f.getPath().replace(".jpg", ".bmp"));
 		}
+	}
+	
+	@Test
+	public void markCharNum(){
 	}
 }
