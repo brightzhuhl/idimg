@@ -2,12 +2,16 @@ package zhl.idimg;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.Test;
 
 import zhl.idimg.img.BMP;
 import zhl.idimg.img.BMPHelper;
+import zhl.idimg.img.ImgExample;
+import zhl.idimg.img.ImgExample.IllegalBMPWidthException;
+import zhl.idimg.img.SVMRecognizer;
 import zhl.idimg.img.Spliter;
 import zhl.idimg.uti.ImgSelector;
 
@@ -16,7 +20,7 @@ public class AppTest {
 	
 	public void split(){
 		BMPHelper helper = new BMPHelper();
-		File basedir = new File("C:\\Users\\Administrator\\Desktop\\验证码处理");
+		File basedir = new File("C:\\Users\\朱洪亮\\Desktop\\验证码识别");
 		File[] bmps = basedir.listFiles((file)->{
 			if(file.getName().endsWith(".bmp")){
 				return true;
@@ -41,7 +45,7 @@ public class AppTest {
 	}
 	
 	public void binary(){
-		File basedir = new File("C:\\Users\\Administrator\\Desktop\\验证码处理");
+		File basedir = new File("C:\\Users\\朱洪亮\\Desktop\\验证码识别");
 		BMPHelper helper = new BMPHelper();
 		
 		File[] jpgs = basedir.listFiles((file)->{
@@ -68,10 +72,9 @@ public class AppTest {
 		}
 	}
 	
-	@Test
 	public void dropSplit(){
 		BMPHelper helper = new BMPHelper();
-		File basedir = new File("C:\\Users\\Administrator\\Desktop\\验证码处理");
+		File basedir = new File("C:\\Users\\朱洪亮\\Desktop\\验证码识别");
 		File[] bmps = basedir.listFiles((file)->{
 			if(file.getName().endsWith(".bmp")){
 				return true;
@@ -90,8 +93,10 @@ public class AppTest {
 						int bw = subBmp[0].length;
 						if(bw>23 && bw<37){
 							result.addAll(spliter.spliteWithDropAL(subBmp, 2));
-						}else if(bw>37){
+						}else if(bw>37 && bw<=50){
 							result.addAll(spliter.spliteWithDropAL(subBmp, 3));
+						}else if(bw>50){
+							result.addAll(spliter.spliteWithDropAL(subBmp, 4));
 						}else{
 							result.add(subBmp);
 						}
@@ -106,6 +111,57 @@ public class AppTest {
 			}else{
 				System.out.println(bmp);
 			}
+		}
+	}
+	
+	@Test
+	public void recognize(){
+		BMPHelper helper = new BMPHelper();
+		File basedir = new File("C:\\Users\\朱洪亮\\Desktop\\验证码识别\\examples\\trainingset");
+		File[] bmps = basedir.listFiles((file)->{
+			if(file.getName().endsWith(".bmp")){
+				return true;
+			}
+			return false;
+		});
+		HashMap<Character,List<byte[][]>> trainMap = new HashMap<>();
+		for(File f:bmps){
+			BMP bmp= helper.readAsBytes(f.getPath());
+			Character tag = f.getName().substring(0, 1).toCharArray()[0];
+			List<byte[][]> bmpArrays = trainMap.get(tag);
+			if(bmpArrays == null){
+				bmpArrays = new ArrayList<>();
+				trainMap.put(tag, bmpArrays);
+			}
+			bmpArrays.add(bmp.getData());
+		}
+		
+		List<ImgExample> examples = new ArrayList<>();
+		for(char key:trainMap.keySet()){
+			ImgExample example = new ImgExample(key, trainMap.get(key));
+			examples.add(example);
+		}
+		
+		SVMRecognizer recognizer = new SVMRecognizer(examples);
+		File testDir = new File("C:\\Users\\朱洪亮\\Desktop\\验证码识别\\examples\\testset");
+		File[] testBmps = testDir.listFiles((file)->{
+			if(file.getName().endsWith(".bmp")){
+				return true;
+			}
+			return false;
+		});
+		for(File f:testBmps){
+			String name = f.getName();
+			String tag = name.substring(0,name.lastIndexOf(".")-1);
+			BMP testBmp = helper.readAsBytes(f.getPath());
+			byte[] svmData = null;
+			try {
+				svmData = ImgExample.formatTrainImg(testBmp.getData());
+			} catch (IllegalBMPWidthException e) {
+				e.printStackTrace();
+				continue;
+			}
+			System.out.println(tag+":"+recognizer.predict(svmData));
 		}
 	}
 }

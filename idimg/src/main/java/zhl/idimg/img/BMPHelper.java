@@ -59,7 +59,7 @@ public class BMPHelper {
 			
 			bmp.setBiClrImportant(readNextInt(in));
 			
-			in.read(new byte[bmp.getBfOffBits()-54]);
+			skipNextBytes(in, bmp.getBfOffBits()-54);
 			
 			int height = bmp.getBiHeight(),
 				width = bmp.getBiWidth();
@@ -78,7 +78,8 @@ public class BMPHelper {
 			}else{
 				j = 0;
 			}
-			byte[] temp = new byte[16];
+			int readSize = width/8 + (width%8==0 ? 0 : 1);
+			byte[] temp = new byte[readSize];
 			byte[] bt = new byte[width];
 			loop1:while(in.read(temp)!=-1){
 				loop2:for(byte b:temp){

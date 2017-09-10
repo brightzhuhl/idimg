@@ -2,6 +2,7 @@ package zhl.idimg.img;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -242,7 +243,8 @@ public class Spliter {
 		HashSet<String> hasSearched = new HashSet<>();
 		ArrayList<int[]> path = new ArrayList<>();
 		int x = pointX,y = 0,bh = bmp.length,bw = bmp[0].length;
-		int lastX=0,lastY=0;
+		//int lastX=0,lastY=0;
+		int lastXn = 0,lastYn=0;
 		while(y < bh-1){
 			
 			int p1 = 5 * ((y+1<bh)&&(x-1>0) ? bmp[y+1][x-1] : 0);
@@ -264,7 +266,7 @@ public class Spliter {
 			}
 			int xn =0 ,yn = 0;
 			if(w == 1){
-				yn = -1;
+				xn = -1;
 			}else if(w == 2){
 				xn = 1;
 			}else if(w == 3){
@@ -280,16 +282,22 @@ public class Spliter {
 			
 			if(x+xn>pointX+4 || x+xn<pointX-4){
 				xn = 0;
-			}
-			if(x == lastX && y==lastY){
 				yn = 1;
+			}
+			if(lastXn==-xn && yn==0){
+				xn = 0;
+				yn = 1;
+			}
+			path.add(new int[]{x,y});
+
+			if(path.size()>100){
+				System.out.println();
 			}
 			x = x + xn;
 			y = y + yn;
 			
-			lastX = x - xn;
-			lastY = y - yn;
-			if(hasSearched.contains(lastY+","+lastX)){
+			lastXn = xn;
+			/*if(hasSearched.contains(lastY+","+lastX)){
 				for(int[] p:path){
 					System.out.println(p[0]+"\t"+p[1]);
 				}
@@ -297,22 +305,42 @@ public class Spliter {
 				throw new RuntimeException("hasSearched");
 			}else{
 				hasSearched.add(lastY+","+lastY);
-			}
-			path.add(new int[]{lastY,lastX});
+			}*/
+			
 		}
-		
-		int mxWidth = 0;
+		path.add(new int[]{path.get(path.size()-1)[0],bh-1});
+		int mxWidth = 0,minWid=Integer.MAX_VALUE;
+		HashMap<Integer, Integer> noRepeatPath = new HashMap<>();
 		for(int[] point:path){
-			if(point[1] > mxWidth){
-				mxWidth = point[1];
+			int tempX = point[0],tempY = point[1];
+			
+			if(noRepeatPath.get(tempY)!=null){
+				noRepeatPath.put(tempY, Integer.min(noRepeatPath.get(tempY), tempX));
+			}else{
+				noRepeatPath.put(tempY, tempX);
+			}
+			
+			if(tempX > mxWidth){
+				mxWidth = tempX;
+			}
+			if(tempX < minWid){
+				minWid = tempX;
 			}
 		}
 		
-		byte[][] left = createAndInit((short)bh, (short)(mxWidth+1), (byte)1),right = createAndInit((short)bh, (short)(bw-mxWidth+1), (byte)1);
+		byte[][] left = createAndInit((short)bh, (short)(mxWidth+1), (byte)1),right = createAndInit((short)bh, (short)(bw-minWid), (byte)1);
 		
 		for(int i=0; i<bh; i++){
-			System.arraycopy(bmp[i],0, left[i], 0, mxWidth);
-			System.arraycopy(bmp[i],mxWidth-1, right[i],0 ,bw-mxWidth+1);
+			try {
+			System.arraycopy(bmp[i],0, left[i], 0, noRepeatPath.get(i));
+			for(int s=bw-1; s>=noRepeatPath.get(i); s--){
+				
+					right[i][s-minWid] = bmp[i][s];
+			}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
 		}
 		
 		List<byte[][]> splitedBmp = new ArrayList<>();
