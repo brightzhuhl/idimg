@@ -8,7 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -290,9 +291,34 @@ public class BMPHelper {
 		}
 		try {
 			file.createNewFile();
-			OutputStream out = new FileOutputStream(file);
+			FileOutputStream out = new FileOutputStream(file,true);
+			//byte[] temp = new byte[heads.length+imgData.length];
+			//System.arraycopy(heads, 0, temp, 0, heads.length);
+			//System.arraycopy(imgData, 0, temp, heads.length, imgData.length);
 			out.write(heads);
-			out.write(imgData);
+			out.flush();
+			for(int i=0; i<imgData.length; i++){
+				/*if(i%121 ==0){
+					imgData[i] = -1;
+				}
+				if(i%50 == 0){
+					System.out.println();
+				}*/
+				out.write(imgData[i]);
+				out.flush();
+				InputStream in = new FileInputStream(file);
+				List<Byte> writen = new ArrayList<>();
+				int temp = -1;
+				while((temp = in.read())!=-1){
+					writen.add((byte)temp);
+				}
+				if(writen.size()!=i+63){
+					Byte[] writenArray = writen.toArray(new Byte[writen.size()]);
+					System.out.println(writenArray);
+				}
+				in.close();
+			}
+			
 			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();

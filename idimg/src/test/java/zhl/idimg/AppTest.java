@@ -20,7 +20,7 @@ public class AppTest {
 	
 	public void split(){
 		BMPHelper helper = new BMPHelper();
-		File basedir = new File("C:\\Users\\朱洪亮\\Desktop\\验证码识别");
+		File basedir = new File("C:\\Users\\Administrator\\Desktop\\验证码处理");
 		File[] bmps = basedir.listFiles((file)->{
 			if(file.getName().endsWith(".bmp")){
 				return true;
@@ -44,8 +44,9 @@ public class AppTest {
 		}
 	}
 	
+	
 	public void binary(){
-		File basedir = new File("C:\\Users\\朱洪亮\\Desktop\\验证码识别");
+		File basedir = new File("C:\\Users\\Administrator\\Desktop\\验证码处理");
 		BMPHelper helper = new BMPHelper();
 		
 		File[] jpgs = basedir.listFiles((file)->{
@@ -74,7 +75,7 @@ public class AppTest {
 	
 	public void dropSplit(){
 		BMPHelper helper = new BMPHelper();
-		File basedir = new File("C:\\Users\\朱洪亮\\Desktop\\验证码识别");
+		File basedir = new File("C:\\Users\\Administrator\\Desktop\\验证码处理");
 		File[] bmps = basedir.listFiles((file)->{
 			if(file.getName().endsWith(".bmp")){
 				return true;
@@ -117,7 +118,7 @@ public class AppTest {
 	@Test
 	public void recognize(){
 		BMPHelper helper = new BMPHelper();
-		File basedir = new File("C:\\Users\\朱洪亮\\Desktop\\验证码识别\\examples\\trainingset");
+		File basedir = new File("C:\\Users\\Administrator\\Desktop\\验证码处理\\examples\\trainingset");
 		File[] bmps = basedir.listFiles((file)->{
 			if(file.getName().endsWith(".bmp")){
 				return true;
@@ -127,6 +128,14 @@ public class AppTest {
 		HashMap<Character,List<byte[][]>> trainMap = new HashMap<>();
 		for(File f:bmps){
 			BMP bmp= helper.readAsBytes(f.getPath());
+			byte[][] bmpArray = bmp.getData();
+			for(int i=0; i<bmpArray.length; i++){
+				for(int j=0; j<bmpArray[0].length; j++){
+					System.out.print(bmpArray[i][j]+"\t");
+				}
+				System.out.println();
+			}
+			System.out.println("next");
 			Character tag = f.getName().substring(0, 1).toCharArray()[0];
 			List<byte[][]> bmpArrays = trainMap.get(tag);
 			if(bmpArrays == null){
@@ -143,7 +152,7 @@ public class AppTest {
 		}
 		
 		SVMRecognizer recognizer = new SVMRecognizer(examples);
-		File testDir = new File("C:\\Users\\朱洪亮\\Desktop\\验证码识别\\examples\\testset");
+		File testDir = new File("C:\\Users\\Administrator\\Desktop\\验证码处理\\examples\\testset");
 		File[] testBmps = testDir.listFiles((file)->{
 			if(file.getName().endsWith(".bmp")){
 				return true;

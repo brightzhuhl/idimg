@@ -3,7 +3,6 @@ package zhl.idimg.img;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -240,11 +239,11 @@ public class Spliter {
 	 * @return
 	 */
 	private List<byte[][]> processDropAL(byte[][] bmp,int pointX){
-		HashSet<String> hasSearched = new HashSet<>();
+		//HashSet<String> hasSearched = new HashSet<>();
 		ArrayList<int[]> path = new ArrayList<>();
 		int x = pointX,y = 0,bh = bmp.length,bw = bmp[0].length;
 		//int lastX=0,lastY=0;
-		int lastXn = 0,lastYn=0;
+		int lastXn = 0;
 		while(y < bh-1){
 			
 			int p1 = 5 * ((y+1<bh)&&(x-1>0) ? bmp[y+1][x-1] : 0);
